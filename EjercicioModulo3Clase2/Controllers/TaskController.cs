@@ -1,5 +1,6 @@
 ﻿using EjercicioModulo3Clase2.Domain.Entities;
 using EjercicioModulo3Clase2.Repository;
+using EjercicioModulo3Clase2.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EjercicioModulo3Clase2.Controllers
@@ -18,11 +19,11 @@ namespace EjercicioModulo3Clase2.Controllers
          */
         #endregion
 
-        private readonly ToDoListDBContext _context;
+        private ITaskService _taskService;
 
-        public TaskController( ToDoListDBContext context )
+        public TaskController(ITaskService taskService )
         {
-            _context = context;
+            _taskService = taskService;
         }
 
         #region Ejercicio 1
@@ -31,7 +32,7 @@ namespace EjercicioModulo3Clase2.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_context.Tasks.ToList());
+            return Ok(_taskService.Get());
         }
         #endregion
 
@@ -40,7 +41,7 @@ namespace EjercicioModulo3Clase2.Controllers
         [HttpGet("{id}")]
         public IActionResult GetTaskById(int id)
         {
-            return Ok(_context.Tasks.Where(w => w.Id == id).FirstOrDefault());
+            return Ok(_taskService.GetTaskById(id));
         }
         #endregion
 
@@ -49,9 +50,7 @@ namespace EjercicioModulo3Clase2.Controllers
         [HttpPost]
         public IActionResult CreateTask([FromBody] Tasks task)
         {
-            _context.Add(task);
-            _context.SaveChanges();
-            return Ok();
+            return Ok(_taskService.CreateTask(task));
         }
         #endregion
 
@@ -60,10 +59,7 @@ namespace EjercicioModulo3Clase2.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateTask([FromRoute] int id, [FromBody] Tasks task)
         {
-            var t = _context.Tasks.FirstOrDefault(w => w.Id == id);
-            t.IsCompleted = task.IsCompleted;
-            _context.SaveChanges();
-            return Ok(t);
+            return Ok(_taskService.UpdateTask(id, task));
         }
         #endregion
         #region Ejercicio 5
@@ -71,10 +67,7 @@ namespace EjercicioModulo3Clase2.Controllers
         [HttpPut("eliminar/{id}")]
         public IActionResult DeleteTaskById([FromRoute] int id)
         {
-            var t = _context.Tasks.FirstOrDefault(x => x.Id == id);
-            t.IsActive = false;
-            _context.SaveChanges();
-            return Ok(t);
+            return Ok(_taskService.DeleteTaskById(id));
         }
         #endregion
     }
